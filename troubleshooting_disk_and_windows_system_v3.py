@@ -1,4 +1,4 @@
-import os, subprocess, time, PySimpleGUI as sg
+import subprocess, time, PySimpleGUI as sg
 
 
 sg.theme('DarkRed1')
@@ -32,7 +32,6 @@ def rodar_sfc():
 resultado=''
 
 def remove_temp():
-    dir_temp = os.environ['TEMP']
     command_remove_temp = subprocess.Popen(('cmd','/c','del','/f','/s', '/q', '%TEMP%', '&&' ,'rmdir', '/s', '/q', '%TEMP%'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
 
     for item in command_remove_temp.stdout:
@@ -41,13 +40,21 @@ def remove_temp():
 
     window.write_event_value('-REMOVE-TEMP-RESULT-', None)
 
+def check_disk_operations_system():
+    check_disk = subprocess.Popen(('cmd', '/c', 'echo Y', '|', 'chkdsk', 'C:', '/f', '/r', '/x'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+
+    for item in check_disk.stdout:
+        time.sleep(0.5)
+        window.write_event_value('-CHECK-DISK-', item)
+    window.write_event_value('-CHECK-DISK-RESULT-', None)
+
 
 layout = [
         [sg.Text('troubleshooting disk and windows system V2')],
         [sg.ButtonMenu('Qual opção:', 
                        ['Menu', [
                         '1. Validar e corrigir corrupção de arquivos do sistema Windows', 
-                        '! 2. Validar e corrigir integridade do sistema de arquivos de um disco', 
+                        '2. Validar e corrigir integridade do sistema de arquivos de um disco', 
                         '3. Limpar os arquivos temporários do Windows', 
                         '! 4. Sair do app' ]
                         ], key='-MENU-')],
@@ -73,6 +80,9 @@ while True:
             window.perform_long_operation(lambda: rodar_sfc())
             window['-MENU-'].update(visible=False)
             window['-INFO-SCAN-'].update(visible=True)
+        elif '2. Validar e corrigir integridade do sistema de arquivos de um disco' in opcao:
+            window.perform_long_operation(lambda: check_disk_operations_system())
+            window['-MENU-'].update(visible=False)
         elif '3. Limpar os arquivos temporários do Windows' in opcao:
             window.perform_long_operation(lambda: remove_temp())
             window['-MENU-'].update(visible=False)
@@ -89,4 +99,10 @@ while True:
         resultado += values['-REMOVE-TEMP-']
         window['-RESULTADO-'].update(resultado)
     elif event == '-REMOVE-TEMP-RESULT-':
+        window['-MENU-'].update(visible=True)
+
+    if event == '-CHECK-DISK-':
+        resultado += values['-CHECK-DISK-']
+        window['-RESULTADO-'].update(resultado)
+    elif event == '-CHECK-DISK-RESULT-':
         window['-MENU-'].update(visible=True)
