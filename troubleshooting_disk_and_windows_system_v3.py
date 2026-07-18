@@ -1,4 +1,4 @@
-import subprocess, time, PySimpleGUI as sg
+import os, subprocess, time, PySimpleGUI as sg
 
 
 sg.theme('DarkRed1')
@@ -21,7 +21,7 @@ Ela é acessível a partir do window.perform_long_operation
 '''
 
 def rodar_sfc():
-    scan = subprocess.Popen(('sfc', '/scannow'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,)
+    scan = subprocess.Popen(('cmd','/c','sfc', '/scannow'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
 
     for item in scan.stdout:
         time.sleep(0.5)
@@ -30,6 +30,17 @@ def rodar_sfc():
     window.write_event_value('-SCAN-RESULTADO-FIM-', None)
 
 resultado=''
+
+def remove_temp():
+    dir_temp = os.environ['TEMP']
+    command_remove_temp = subprocess.Popen(('cmd','/c','del','/f','/s', '/q', '%TEMP%', '&&' ,'rmdir', '/s', '/q', '%TEMP%'), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+
+    for item in command_remove_temp.stdout:
+        time.sleep(0.5)
+        window.write_event_value('-REMOVE-TEMP-', item)
+
+    window.write_event_value('-REMOVE-TEMP-RESULT-', None)
+
 
 layout = [
         [sg.Text('troubleshooting disk and windows system V2')],
@@ -62,6 +73,9 @@ while True:
             window.perform_long_operation(lambda: rodar_sfc())
             window['-MENU-'].update(visible=False)
             window['-INFO-SCAN-'].update(visible=True)
+        elif '3. Limpar os arquivos temporários do Windows' in opcao:
+            window.perform_long_operation(lambda: remove_temp())
+            window['-MENU-'].update(visible=False)
 
 
     if event == '-SCAN-RESULTADO-':
@@ -70,3 +84,9 @@ while True:
     elif event == '-SCAN-RESULTADO-FIM-':
         window['-MENU-'].update(visible=True)
         window['-INFO-SCAN-'].update(visible=False)
+
+    if event == '-REMOVE-TEMP-':
+        resultado += values['-REMOVE-TEMP-']
+        window['-RESULTADO-'].update(resultado)
+    elif event == '-REMOVE-TEMP-RESULT-':
+        window['-MENU-'].update(visible=True)
