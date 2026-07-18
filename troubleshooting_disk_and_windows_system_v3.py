@@ -1,7 +1,7 @@
 import subprocess, time, PySimpleGUI as sg
 
 
-sg.theme('DarkRed1')
+sg.theme('DarkGrey3')
 
 ''' FUNÇÃO QUE RODA A VERIFICAÇÃO DE ARQUIVOS DO WINDOWS
 
@@ -50,14 +50,13 @@ def check_disk_operations_system():
 
 
 layout = [
-        [sg.Text('troubleshooting disk and windows system V2')],
+        [sg.Text('Resolução de problemas do Windows')],
         [sg.ButtonMenu('Qual opção:', 
                        ['Menu', [
                         '1. Validar e corrigir corrupção de arquivos do sistema Windows', 
                         '2. Validar e corrigir integridade do sistema de arquivos de um disco', 
-                        '3. Limpar os arquivos temporários do Windows', 
-                        '! 4. Sair do app' ]
-                        ], key='-MENU-')],
+                        '3. Limpar os arquivos temporários do Windows']
+                        ], key='-MENU-'), sg.Button('Sair', key='-EXIT-')],
         [sg.Text('Essa verificação de integridade usa como padrão o comando sfc /scannow. O sfc /scannow comando examinará todos os arquivos do sistema protegidos e substituirá arquivos corrompidos por uma cópia armazenada em cache. Os resultados da verificação serão mostrados depois que esse processo for concluído', key='-INFO-SCAN-', size=(70,0), visible=False)],
         [sg.Multiline(size=(80,20), key='-RESULTADO-', font=('Calibri', 11), autoscroll=True, disabled=True)]
 ]
@@ -70,6 +69,9 @@ while True:
     event, values = window.read()
 
     if event == sg.WIN_CLOSED:
+        break
+
+    if event == '-EXIT-':
         break
 
     elif event == '-MENU-':
